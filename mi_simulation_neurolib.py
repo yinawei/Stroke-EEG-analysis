@@ -23,6 +23,7 @@ from spectral_connectivity import Multitaper, Connectivity
 import itertools
 import random
 from scipy.signal import butter, filtfilt
+from nilearn.plotting import plot_connectome
 
 
 def model_para_set(cmat, dmat, seed):
@@ -869,4 +870,5 @@ if __name__ == "__main__":
 
     plt.ioff()
     plt.show()
+
 
