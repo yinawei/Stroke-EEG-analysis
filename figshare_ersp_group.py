@@ -8,30 +8,9 @@ from scipy import stats
 import seaborn as sns
 import pandas as pd
 from statannotations.Annotator import Annotator
-matplotlib.use("Qt5Agg")
+# matplotlib.use("Qt5Agg")
 matplotlib.rcParams['svg.fonttype'] = 'none'
 
-
-def assump_test_bar(x, y, hue, data, pairs):
-    flag = 0
-    for i, pair in enumerate(pairs):
-        data1 = data[(data[x] == pairs[i][0][0]) & (data[hue] == pairs[i][0][1])]
-        data2 = data[(data[x] == pairs[i][1][0]) & (data[hue] == pairs[i][1][1])]
-        w, p = stats.shapiro(data1[y].values - data2[y].values)
-        if p <= 0.05:
-            flag = 1
-    if flag == 0:
-        return 't-test_paired'
-    else:
-        return 'Wilcoxon'
-
-def r2(data, **kws):
-    col = data.columns.values.tolist()
-    col_mst = [x for x in col if x not in ['Freq', 'MI', 'NIHSS']]
-    r, p = scipy.stats.pearsonr(data['NIHSS'], data[col_mst[0]])
-    ax = plt.gca()
-    ax.text(.05, .9, 'r={:.2f}, p={:.2g}'.format(r, p),
-            transform=ax.transAxes)
 
 def violin_plot_ahand(data, x, y, pairs):
     """Plot violinplot of Lateral index between two NIHSS group
@@ -216,3 +195,4 @@ if __name__ == "__main__":
 
     plt.ioff()
     plt.show()
+

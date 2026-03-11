@@ -5,7 +5,7 @@ import pandas as pd
 import shap
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use("Qt5Agg")
+# matplotlib.use("Qt5Agg")
 import networkx as nx
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -256,5 +256,6 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1, figsize=(9.5 / 2.54, 6.5 / 2.54), layout='constrained')
     shap.plots.beeswarm(shap_values, plot_size=(9.5 / 2.54, 6.5 / 2.54))
     fig, ax = plt.subplots(1, 1, figsize=(9.5 / 2.54, 6 / 2.54), layout='constrained')
-    shap.plots.bar(shap_values, ax=ax)
+    shap.plots.bar(shap_values, ax=ax, show=False)
     plt.show()
+    print('a')

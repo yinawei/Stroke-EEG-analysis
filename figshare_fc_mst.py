@@ -13,7 +13,7 @@ from scipy import stats
 from statannotations.Annotator import Annotator
 import matplotlib.ticker as ticker
 
-matplotlib.use("Qt5Agg")
+# matplotlib.use("Qt5Agg")
 
 def mst_network(connect):
     """Create maximum spanning tree from fc matrix
@@ -48,23 +48,6 @@ def mst_network(connect):
     # create maximum spanning tree
     MST = nx.maximum_spanning_tree(G, weight='weight')
 
-    # draw MST Figure 4
-    # fig, ax = plt.subplots(1, 1, figsize=(6.2 / 2.54, 5.8 / 2.54), layout='constrained')
-    # adj = nx.to_numpy_array(MST)
-    # adj = np.where(adj == 0, 0, 1)
-    # coords[:, 0] = coords[:, 0] * 0.9
-    # coords[:, 1] = coords[:, 1] * 1.2
-    # coords = coords * 70
-    # coords[:, 1] = coords[:, 1] - 15
-    # edge_prop = dict()
-    # edge_prop['lw'] = 1.5
-    # edge_prop['c'] = 'black'
-    # edge_prop['alpha'] = 0.6
-    # node_degree = MST.degree()
-    # tmp = np.array([x[1] for x in node_degree])
-    # node_size = tmp * 15
-    # plot_connectome(adj, coords, node_size=node_size, display_mode='z', edge_kwargs=edge_prop, axes=ax, node_color='cornflowerblue', alpha=0.2, colorbar=False)
-
     # calculate MST measure
     diameter = nx.diameter(MST)
     ecc = nx.eccentricity(MST)
@@ -75,19 +58,58 @@ def mst_network(connect):
 
     return np.array([diameter, ecc_mean, len(leaf_nodes), tree_hie])
 
-def r2(data, **kws):
-    """calculate personr correlation in selected freq band and MI hand
+def draw_mst(connect):
+    """Create maximum spanning tree from fc matrix
 
-    :param data: dataframe
-    :param kws:
-    :return:
+    :param connect: functional connectivity matrix
+    :return: MST measures: [Diameter, Eccentricity, Leaf number, Tree hierarchy]
     """
-    col = data.columns.values.tolist()
-    col_mst = [x for x in col if x not in ['Freq', 'MI', 'NIHSS']]
-    r, p = scipy.stats.pearsonr(data['NIHSS'], data[col_mst[0]])
-    ax = plt.gca()
-    ax.text(.05, .9, 'r={:.2f}, p={:.2g}'.format(r, p),
-            transform=ax.transAxes)
+
+    # set node postition and labels
+    coords = np.array([[-0.309, 0.95, -0.0349], [0.309, 0.95, -0.0349], [0, 0.719, 0.695], [-0.445, 0.673, 0.5],
+                       [0.445, 0.673, 0.5], [-0.809, 0.587, -0.0349], [0.809, 0.587, -0.0349], [0, 0.391, 0.921],
+                       [-0.576, 0.36, 0.643], [0.576, 0.36, 0.643], [-0.95, 0.309, 0.0349], [0.95, 0.309, -0.0349],
+                       [0, 0, 1], [-0.619, 0, 0.695], [0.619, 0, 0.695], [-0.999, 6.12e-17, -0.0349],
+                       [0.999, 6.12e-17, -0.0349], [-0.576, -0.36, 0.643], [0.576, -0.36, 0.643],
+                       [-0.95, -0.309, -0.0349],
+                       [0.95, -0.309, -0.0349], [0, -0.719, 0.921], [-0.445, -0.673, 0.5], [0.445, -0.673, 0.5],
+                       [-0.809, -0.587, -0.0349], [0.809, -0.587, -0.0349], [0, -0.999, 0.695],
+                       [-0.309, -0.95, -0.0349],
+                       [0.309, -0.95, -0.0349]])
+    pos = coords[:, :-1]
+    labels = ["FP1", "FP2", "Fz", "F3", "F4", "F7", "F8", "FCz", "FC3", "FC4", "FT7", "FT8", "Cz", "C3",
+              "C4", "T3", "T4", "CP3", "CP4", "TP7", "TP8", "Pz", "P3", "P4", "T5", "T6", "Oz", "O1", "O2"]
+    pos_dict = dict()
+    labels_dict = dict()
+    for i in range(pos.shape[0]):
+        labels_dict[i] = labels[i]
+        pos_dict[i] = pos[i, :]
+
+    # create graph from adjacent matrix
+    G = nx.from_numpy_array(connect)
+
+    # create maximum spanning tree
+    MST = nx.maximum_spanning_tree(G, weight='weight')
+
+    # draw MST Figure 4
+    fig, ax = plt.subplots(1, 1, figsize=(6.2 / 2.54, 5.8 / 2.54), layout='constrained')
+    adj = nx.to_numpy_array(MST)
+    adj = np.where(adj == 0, 0, 1)
+    coords[:, 0] = coords[:, 0] * 0.9
+    coords[:, 1] = coords[:, 1] * 1.2
+    coords = coords * 70
+    coords[:, 1] = coords[:, 1] - 15
+    edge_prop = dict()
+    edge_prop['lw'] = 1.5
+    edge_prop['c'] = 'black'
+    edge_prop['alpha'] = 0.6
+    node_degree = MST.degree()
+    tmp = np.array([x[1] for x in node_degree])
+    node_size = tmp * 15
+    plot_connectome(adj, coords, node_size=node_size, display_mode='z', edge_kwargs=edge_prop, axes=ax, node_color='cornflowerblue', alpha=0.2, colorbar=False)
+
+    return 0
+
 
 def violin_plot_ahand(data, x, y, pairs):
     """Violin plot for ahand MI
@@ -168,8 +190,8 @@ if __name__ == "__main__":
     sub = pd.read_csv('data_load/subject.csv')
 
     # plot mst of subject 43,22 (figure 4 right column for paper)
-    # mst_example1 = mst_network(np.squeeze(pli_left[42, :, :, 1]))  # 1:low beta band
-    # mst_example2 = mst_network(np.squeeze(pli_left[21, :, :, 1]))
+    mst_example1 = draw_mst(np.squeeze(pli_left[42, :, :, 1]))  # 1:low beta band
+    mst_example2 = draw_mst(np.squeeze(pli_left[21, :, :, 1]))
 
     # calculate MST for all subjects
     mst_stat_left, mst_stat_right = mst_measure(np.arange(50), pli_left, pli_right)

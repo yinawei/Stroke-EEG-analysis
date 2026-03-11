@@ -6,11 +6,11 @@ import matplotlib
 import numpy as np
 import mne
 import matplotlib.pyplot as plt
-from mne.time_frequency import tfr_morlet, tfr_array_morlet, tfr_multitaper
-from matplotlib.colors import Normalize, TwoSlopeNorm
+from mne.time_frequency import tfr_multitaper
 import scipy.io as sio
 import matplotlib.colors as colors
-matplotlib.use("Qt5Agg")
+plt.ion()
+# matplotlib.use("Qt5Agg")
 
 
 def epochs_make(eeg, labels, trigger):
@@ -61,13 +61,16 @@ def epochs_make(eeg, labels, trigger):
     return epochs
 
 # baseline correct: logratio
-def ersp_plot_logratio(epochs, baseline, fs, info):
+def ersp_plot_logratio(epochs, baseline, fs, info, type, freq_band, clim):
     """Plot ERSP and ERD topomap for C3 C4 channel in multi frequency band
 
     :param epochs: mne epoch data
     :param baseline: [t1, t2], time baseline used to correct ersp
     :param fs: sampling frequency
     :param info: montage info to plot topomap
+    :param type: left or right-hand motor imagery, 'left_hand' or 'right_hand'
+    :param freq_band: [low, high]
+    :param clim: clim of the colorbar of ERSP topomap
     :return: ERSP value of 29 channels in 3 frequency bands for left and right hand MI
     """
     # time frequeny analysis
@@ -91,10 +94,8 @@ def ersp_plot_logratio(epochs, baseline, fs, info):
 
     # plot C3,C4 channel ersp(figure 2 left column of paper, sub=22,43)
     fig, ax = plt.subplots(1, 2, figsize=(10/2.54, 4.5/2.54), gridspec_kw={'width_ratios': [0.5,0.5], 'wspace': 0.055}, sharey=True, layout='constrained')
-    tf1['left_hand'].average().plot(picks='C3', cmap='RdBu_r', axes=ax[0], colorbar=False, vmin=-3.8, vmax=3.8)   # Affected hand MI
-    tf1['left_hand'].average().plot(picks='C4', cmap='RdBu_r', axes=ax[1], colorbar=False, vmin=-3.8, vmax=3.8)
-    # tf1['right_hand'].average().plot(picks='C3', cmap='RdBu_r', axes=ax[0], colorbar=False, vmin=-3.8, vmax=3.8)    # Unaffected hand MI
-    # tf1['right_hand'].average().plot(picks='C4', cmap='RdBu_r', axes=ax[1], colorbar=False, vmin=-3.8, vmax=3.8)
+    tf1[type].average().plot(picks='C3', cmap='RdBu_r', axes=ax[0], colorbar=False, vlim=(-3.8, 3.8))   # Affected hand MI
+    tf1[type].average().plot(picks='C4', cmap='RdBu_r', axes=ax[1], colorbar=False, vlim=(-3.8, 3.8))
     ax[0].plot(np.zeros(25), np.arange(6, 31), '--r')
     ax[1].plot(np.zeros(25), np.arange(6, 31), '--r')
     ax[1].set_ylabel('')
@@ -102,57 +103,53 @@ def ersp_plot_logratio(epochs, baseline, fs, info):
     ax[1].set_title('C4 channel')
     clb = fig.colorbar(ax[-1].images[-1], ax=ax[-1], shrink=0.8)  # shrink=0.6
     clb.ax.set_title('dB')
-    clb.ax.set(yticklabels=['', '-2.0', '0', '2.0', ''])
 
     # plot averaged ERSP topomap (figure 2 right column of paper)
     f = tf1.freqs
+    plot_names = [None] * len(ch_names)
+    plot_names[13] = "C3"
+    plot_names[14] = "C4"
     plt.rc('font', size=11, family='Arial', weight='normal')
     mask = np.full(29, False, dtype=bool)
     mask[13:15] = 'True'
     fig, ax = plt.subplots(1, 1, figsize=(4.5/2.54, 4.5/2.54))
-    ind1 = np.where(f >= 21)[0][0]   # High beta band
-    ind2 = np.where(f >= 29)[0][0]
-    # ind1 = np.where(f >= 14)[0][0]  # Low beta band
-    # ind2 = np.where(f >= 20)[0][0]
-    erd_right = tf1['left_hand'].data  # Affected hand MI
-    # erd_right = tf1['right_hand'].data  # Unaffected hand MI
+    ind1 = np.where(f >= freq_band[0])[0][0]
+    ind2 = np.where(f >= freq_band[1])[0][0]
+    erd_right = tf1[type].data
     erd_right = np.squeeze(np.mean(erd_right[:, :, ind1:ind2, (1-t0) * fs // decim:(3 - t0) * fs // decim], axis=(-2, -1, 0)))
-    im, _ = mne.viz.plot_topomap(erd_right, info, sphere=(0, 0, 0, 0.1), contours=1, cmap='RdBu_r', axes=ax, names=ch_names,
+    im, _ = mne.viz.plot_topomap(erd_right, info, sphere=(0, 0, 0, 0.1), contours=1, cmap='RdBu_r', axes=ax, names=plot_names,
                                  mask=mask, mask_params={'markersize': 1, 'markerfacecolor': 'none'})
-    im.set_clim(-1.5, 0.5)    # fig2
-    # im.set_clim(-2.5, 1.5)  # fig3
-    # im.set_clim(-2.7, 1)  # figS1
+    im.set_clim(clim[0], clim[1])
     clb = fig.colorbar(ax.images[-1], ax=ax, shrink=0.61)  # shrink=0.6
     clb.ax.set_title('dB')
     clb.ax.tick_params(labelsize=9)
-    # clb.set_clim(np.min(erd_right), 0.75)
-    ax.set_title('High beta (21-29 Hz)', fontsize=11)
-    # ax.set_title('Low beta (14-20 Hz)', fontsize=11)
+
+    if freq_band[0] == 14:
+        ax.set_title('Low beta (14-20 Hz)', fontsize=11)
+    else:
+        ax.set_title('High beta (21-29 Hz)', fontsize=11)
     plt.rc('font', size=9, family='Arial', weight='normal')
 
     return 0
 
-def ersp_logratio_band(epochs, baseline, fs, info):
+def ersp_logratio_band(epochs, baseline):
     """Compute raw ERSP value (only averaged in time dimension)
 
     :param epochs: mne epochs data
     :param baseline: [t1, t2], time baseline used to correct ersp
-    :param fs: sampling frequency
-    :param info:  montage info
     :return: raw ERSP value for left and right hand, (50, 20, 29, 24)
              50 subs, 20 trials, 29 channels, 24 frequency
     """
     decim = 2
     freqs = np.arange(6,30)
-    # EEG的多带频率表示
     tf = tfr_multitaper(
-        epochs,
-        freqs=freqs,
-        n_cycles=freqs,
-        use_fft=True,
-        return_itc=False,
-        average=False,
-        decim = decim   # 降采样因子
+            epochs,
+            freqs=freqs,
+            n_cycles=freqs,
+            use_fft=True,
+            return_itc=False,
+            average=False,
+            decim = decim
     )
     t0 = baseline[0]
     tf1 = tf.copy()
@@ -164,13 +161,6 @@ def ersp_logratio_band(epochs, baseline, fs, info):
 
     return erd_left, erd_right
 
-
-def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
-    new_cmap = colors.LinearSegmentedColormap.from_list(
-        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
-        cmap(np.linspace(minval, maxval, n)))
-
-    return new_cmap
 
 if __name__ == "__main__":
     # adjust figure format
@@ -186,9 +176,9 @@ if __name__ == "__main__":
 
     # s: subject num(1-50)
     for s in range(1, 51):
-        print(str(s))
-        # s = 43
-        # s = 22
+        # Enable the following two lines for plotting; comment for ERSP calculation
+        # s = 43   # Mild impairment (NIHSS=2), Subject 43
+        # s = 22   # Severe impairment (NIHSS=11), Subject 22
 
         if s >= 10:
             data = sio.loadmat('data_load/data_clean/sub-' + str(s) + '_task-motor-imagery_eeg.mat')    # data preprocessed using EEGLAB
@@ -204,10 +194,12 @@ if __name__ == "__main__":
         fs = 500
 
         # plot ERSP (if not need, comment it)
-        ersp_plot_logratio(epochs_train, (-1, 0), fs, epochs_train.info)
+        # ersp_plot_logratio(epochs_train, (-1, 0), fs, epochs_train.info, type = 'left_hand', freq_band=[21,29], clim=[-1.5, 0.5])  # fig 2 a or b
+        # ersp_plot_logratio(epochs_train, (-1, 0), fs, epochs_train.info, type='right_hand', freq_band=[21, 29], clim=[-2.5, 1.5])  # fig 3 a or b
+        # ersp_plot_logratio(epochs_train, (-1, 0), fs, epochs_train.info, type='right_hand', freq_band=[14, 20], clim=[-2.7, 1])  # fig s1 a or b
 
         # calculate ERSP
-        ERD_left, ERD_right = ersp_logratio_band(epochs_train, (-1, 0), fs, epochs_train.info)
+        ERD_left, ERD_right = ersp_logratio_band(epochs_train, (-1, 0))
 
         # save ERSP data (further used to statistical analysis)
         save_dir = "data_load/ERD_data_band/"
@@ -215,6 +207,5 @@ if __name__ == "__main__":
         np.save(os.path.join(save_dir, f"erd_left_s{str(s)}"), ERD_left)
         np.save(os.path.join(save_dir, f"erd_right_s{str(s)}"), ERD_right)
 
-    plt.ioff()
     plt.show()
 
