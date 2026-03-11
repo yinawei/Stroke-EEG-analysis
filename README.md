@@ -1,11 +1,13 @@
 # Stroke-EEG-analysis
+
 Analysis of motor imagery EEG data in stroke patients and mechanistic interpretation based on a whole-brain model.
 
 
 ## Installation
+**Operating System:**  Ubuntu 22.04.5 LTS
 1. Create a conda environment
 ```bash
-conda create -n env_name python=3.10
+conda create -n env_name python=3.10.16
 ```
 2. Install pip package
 ```bash
@@ -23,7 +25,7 @@ The EEG data preprocessed using the EEGLAB toolbox of MATLAB in this work is sto
 ## Usage
 1. Python file: figshare_stroke_ersp.py
 -   Calculate the Event-Related Spectral Perturbation (ERSP) values of EEG signals during left/right hand motor imagery for 50 stroke patients, covering three frequency bands: alpha, low beta, and high beta.
--   Plot ERSP curves and Event-Related Desynchronization (ERD) topographic maps for the C3 and C4 channels.
+-   Plot time-frequency ERSP maps and the spatial topography of ERSP for the C3 and C4 channels.
 -   Save the subject-specific ERSP values (named as `erd_left_sx.npy` and `erd_right_sx.npy`, where "x" denotes the subject index) to the directory `data_load/ERD_data_band`.
 ```bash
 python figshare_stroke_ersp.py
@@ -59,13 +61,19 @@ python figshare_fc_mst.py
 python feature_important.py
 ```
 
-6. Python file: mi_simulation_neurolib.py
+6. Python file: heterogeneity_whole_brain_model.py
 - Employ a whole-brain model consisting of 80 brain regions, each containing interacting excitatory and inhibitory neuronal populations governed by the Wilson-Cowan model.
-- Transform population neuronal signals into EEG signals using a double exponential function and a boundary element method (BEM)-based forward solution.
+- Implementing model heterogeneity using neurotransmitter density gradients.
+```bash
+python heterogeneity_whole_brain_model.py
+```
+
+7. Python file: Stroke_simulation_whole_brain_model.py
+- Transform population neuronal signals into EEG signals.
 - Simulate the effects of motor imagery and lesions on the whole-brain model.
 - Analyze the topological features of brain networks both with and without simulated lesions.
 ```bash
-python mi_simulation_neurolib.py
+python Stroke_simulation_whole_brain_model.py
 ```
 
 ## Directory
@@ -75,7 +83,8 @@ python mi_simulation_neurolib.py
 │  figshare_stroke_fc.py
 │  figshare_fc_mst.py
 │  feature_important.py
-│  mi_simulation_neurolib.py
+│  heterogeneity_whole_brain_model.py
+│  Stroke_simulation_whole_brain_model.py
 │  
 ├─data_load
 │  │  subject.csv
@@ -97,14 +106,15 @@ python mi_simulation_neurolib.py
 │      	erd_right_s50.npy
 |   │ 
 │   └─ImCoh_data
-|       └─alpha_beta12
-|             imcoh_left.npy
-|             imcoh_right.npy 
+|       imcoh_left.npy
+|       imcoh_right.npy 
 |   │ 
 │   └─model_data
-│      	best_sSC.npy
-│      	max_corr_all.npy
+│      	aal2.nii.gz
+│      	curr_cmat.npy
 │      	custom_forward.fif
+│      	receptor_data_aal2_neurolib.csv
 
 
 ```
+
