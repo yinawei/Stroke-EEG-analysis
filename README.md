@@ -28,7 +28,7 @@ preprocessed EEG files used here are included in `data_load/data_clean/`.
 Python file: `figshare_stroke_ersp.py`
 
 - Calculates event-related spectral perturbation (ERSP) during left- and
-  right-hand motor imagery for 50 stroke participants in the alpha, low-beta,
+  right-hand motor imagery for stroke participants in the alpha, low-beta,
   and high-beta bands.
 - Plots time-frequency ERSP maps and C3/C4 spatial topographies.
 - Saves participant ERSP arrays as `erd_left_sX.npy` and `erd_right_sX.npy`
@@ -62,7 +62,7 @@ figures/ersp_partial_correlation/*.png
 Python file: `figshare_stroke_fc.py`
 
 - Calculates imaginary-coherence functional connectivity during left- and
-  right-hand motor imagery for 50 stroke participants in the alpha, low-beta,
+  right-hand motor imagery for stroke participants in the alpha, low-beta,
   and high-beta bands.
 - Plots functional-connectivity matrices and their corresponding topographic
   maps.
