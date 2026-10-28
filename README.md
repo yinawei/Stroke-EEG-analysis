@@ -195,7 +195,7 @@ python plot_lesion_sensitivity.py
 Output:
 
 ```text
-figures/lesion_sensitivity/lesion_sensitivity_panels_b_to_e.png
+figures/lesion_sensitivity/lesion_sensitivity_panels_a_to_d.png
 ```
 
 ## Directory structure
