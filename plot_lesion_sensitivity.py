@@ -1,4 +1,4 @@
-"""Run lesion-model sensitivity simulations and plot panels b--e."""
+"""Run lesion-model sensitivity simulations."""
 
 from __future__ import annotations
 
@@ -39,15 +39,15 @@ RANDOM_SEED = 2026
 
 METRICS = (
     ("diameter", "Diameter", "Diameter"),
-    ("eccentricity_range", "Eccentricity range", "Eccentricity"),
+    ("eccentricity_range", "Eccentricity", "Eccentricity"),
     ("leaf_number", "Leaf number", "Leaf_number"),
     ("tree_hierarchy", "Tree hierarchy", "Tree_hierarchy"),
 )
 
 STRATEGIES = (
-    ("random_scattered", "Random node deletion", "c"),
-    ("hub_centered_strength", "Targeted hub deletion", "d"),
-    ("random_centered_contiguous", "Anatomically constrained deletion", "e"),
+    ("random_scattered", "Random node deletion", "b"),
+    ("hub_centered_strength", "Targeted hub deletion", "c"),
+    ("random_centered_contiguous", "Anatomically constrained deletion", "d"),
 )
 
 ATTENUATION_COLORS = {
@@ -492,7 +492,7 @@ def validate_inputs(
         raise ValueError("Original and sensitivity random-deletion results do not match.")
 
 
-def main_b_to_e() -> None:
+def main_a_to_d() -> None:
     args = parse_args()
     configure_style()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -543,7 +543,7 @@ def main_b_to_e() -> None:
         padding = .08 * max(high - low, 1e-6)
         for axes in axes_rows:
             axes[column].set_ylim(low - padding, high + padding)
-    for axes, letter in zip(axes_rows, "bcde"):
+    for axes, letter in zip(axes_rows, "abcd"):
         add_panel_letter(fig, axes[0], letter)
     for axes in axes_rows:
         for axis in axes:
@@ -554,7 +554,7 @@ def main_b_to_e() -> None:
                       label=f"{100*f:.0f}%") for f in ATTENUATION_COLORS]
     fig.legend(handles=handles, title="Attenuation", loc="lower center",
                bbox_to_anchor=(.54, .012), ncol=4, fontsize=7, title_fontsize=7)
-    output = OUTPUT_DIR / "lesion_sensitivity_panels_b_to_e.png"
+    output = OUTPUT_DIR / "lesion_sensitivity_panels_a_to_d.png"
     fig.savefig(output, dpi=300, facecolor="white")
     plt.close(fig)
     trajectories.to_csv(OUTPUT_DIR / "trajectory_summary.csv", index=False)
@@ -562,4 +562,4 @@ def main_b_to_e() -> None:
 
 
 if __name__ == "__main__":
-    main_b_to_e()
+    main_a_to_d()
