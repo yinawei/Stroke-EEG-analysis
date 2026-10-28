@@ -20,7 +20,6 @@ available from [Figshare](https://doi.org/10.6084/m9.figshare.21679035.v5). The
 preprocessed EEG files used here are included in `data_load/data_clean/`.
 
 
-```
 
 ## Usage
 
