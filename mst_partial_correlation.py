@@ -357,7 +357,7 @@ def plot_domain_panels(
         "ERSP_Ipsilateral": "Ipsilateral ERSP",
         "Lateral_Index": "Lateral index",
         "Diameter": "Diameter",
-        "Eccentricity": "Eccentricity range",
+        "Eccentricity": "Eccentricity",
         "Leaf_number": "Leaf number",
         "Tree_hierarchy": "Tree hierarchy",
     }
