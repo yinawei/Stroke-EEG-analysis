@@ -77,7 +77,7 @@ python figshare_stroke_fc.py
 
 Python file: `mst_partial_correlation.py`
 
-- - Performs partial Spearman correlation tests for MST features, controlling for age, sex,
+- Performs partial Spearman correlation tests for MST features, controlling for age, sex,
   post-stroke duration, paralysis side, and first versus recurrent stroke.
 
 ```bash
